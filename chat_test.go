@@ -1,33 +1,37 @@
 package chat_test
 
-import "testing"
+import (
+	"net"
+	"testing"
+)
 
 func TestServerConn(t *testing.T) {
 	addr := ":8080"
-	errExpected := false
 
-	conn, err := chat.NewConn(addr)
+	conn, err := net.Dial("tcp", addr)
 	defer conn.Close()
 
-	if errExpected != (err != nil) {
-		t.Errorf("NewConn(%s): error expected %t, got %v", addr, errExpected, err)
+	if err != nil {
+		t.Errorf("connection failed: %v", err)
 	}
 }
 
 func TestWelcomeMessage(t *testing.T) {
 	addr := ":8080"
-	want := "Welcome to GoChat !"
-	errExpected := false
+	want := "Welcome to ChatRoom !"
 
-	conn, _ := chat.NewConnection(addr)
+	conn, _ := net.Dial("tcp", addr)
 	defer conn.Close()
 
-	got, err := conn.Read()
+	buf := make([]byte, 512)
+	_, err := conn.Read(buf)
 
-	if errExpected != (err != nil) {
-		t.Errorf("conn.Read(): error expected %t, got %v", errExpected, err)
+	got := string(buf)
+
+	if err != nil {
+		t.Errorf("reading welcome message failed:  %v", err)
 	}
 	if got != want {
-		t.Errorf("conn.Read() welcome message: got %s, want %s", got, want)
+		t.Errorf("welcome message: got %q, want %q", got, want)
 	}
 }
