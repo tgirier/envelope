@@ -6,14 +6,15 @@ import (
 )
 
 func TestServerConn(t *testing.T) {
+	t.Parallel()
+
 	addr := ":8080"
 
 	conn, err := net.Dial("tcp", addr)
-	defer conn.Close()
-
 	if err != nil {
-		t.Errorf("connection failed: %v", err)
+		t.Fatalf("connection failed: %v", err)
 	}
+	conn.Close()
 }
 
 func TestWelcomeMessage(t *testing.T) {
