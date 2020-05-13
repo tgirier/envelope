@@ -1,6 +1,8 @@
 package chat_test
 
 import (
+	"bytes"
+	"io"
 	"net"
 	"testing"
 )
@@ -18,16 +20,21 @@ func TestServerConn(t *testing.T) {
 }
 
 func TestWelcomeMessage(t *testing.T) {
+	t.Parallel()
+
 	addr := ":8080"
 	want := "Welcome to ChatRoom !"
 
-	conn, _ := net.Dial("tcp", addr)
+	conn, err := net.Dial("tcp", addr)
+	if err != nil {
+		t.Fatalf("connection failed: %v", err)
+	}
 	defer conn.Close()
 
-	buf := make([]byte, 512)
-	_, err := conn.Read(buf)
+	var b bytes.Buffer
+	io.Copy(&b, conn)
 
-	got := string(buf)
+	got := b.String()
 
 	if err != nil {
 		t.Errorf("reading welcome message failed:  %v", err)
