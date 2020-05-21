@@ -51,7 +51,7 @@ func TestWelcomeMessage(t *testing.T) {
 	defer conn.Close()
 
 	var b bytes.Buffer
-	io.Copy(&b, conn)
+	_, err = io.Copy(&b, conn)
 
 	got := b.String()
 
