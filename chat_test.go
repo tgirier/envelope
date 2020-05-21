@@ -56,7 +56,7 @@ func TestWelcomeMessage(t *testing.T) {
 	got := b.String()
 
 	if err != nil {
-		t.Errorf("reading welcome message failed:  %v", err)
+		t.Fatalf("reading welcome message failed:  %v", err)
 	}
 	if got != want {
 		t.Errorf("welcome message: got %q, want %q", got, want)
