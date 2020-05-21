@@ -3,9 +3,28 @@ package chat_test
 import (
 	"bytes"
 	"io"
+	"log"
 	"net"
+	"os"
 	"testing"
 )
+
+func TestMain(m *testing.M) {
+	serverErrors := make(chan error, 1)
+
+	go func() {
+		addr := ":8080"
+		serverErrors <- chat.Listen("tcp", addr)
+	}()
+
+	select {
+	case err := <-serverErrors:
+		log.Fatalf("starting server failed: %v", err)
+	default:
+		os.Exit(m.Run())
+	}
+
+}
 
 func TestServerConn(t *testing.T) {
 	t.Parallel()
