@@ -107,7 +107,7 @@ func TestAtoBMessage(t *testing.T) {
 	got := b.String()
 
 	if got != want {
-		t.Errorf("connection b received message: got %s, want %s", got, want)
+		t.Errorf("connection b received message: got %q, want %q", got, want)
 	}
 
 }
