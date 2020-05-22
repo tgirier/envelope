@@ -111,3 +111,73 @@ func TestAtoBMessage(t *testing.T) {
 	}
 
 }
+
+func TestBiDirectionnalMessages(t *testing.T) {
+	t.Parallel()
+
+	addr := ":8080"
+	mA := "Hello B !"
+	mB := "Hello A !"
+	wantA := "Hello A !"
+	wantB := "Hello B !"
+
+	// Setting up connA and connB
+	connA, err := net.Dial("tcp", addr)
+	if err != nil {
+		t.Fatalf("connection a failed: %v", err)
+	}
+	defer connA.Close()
+
+	connB, err := net.Dial("tcp", addr)
+	if err != nil {
+		t.Fatalf("connection b failed: %v", err)
+	}
+	defer connB.Close()
+
+	// Receiving welcome messages and discarding it
+	var bA bytes.Buffer
+	_, err = io.Copy(&bA, connA)
+	if err != nil {
+		t.Fatalf("reading welcome message on connection a failed: %v", err)
+	}
+	bA.Reset()
+
+	var bB bytes.Buffer
+	_, err = io.Copy(&bB, connB)
+	if err != nil {
+		t.Fatalf("reading welcome message on connection b failed: %v", err)
+	}
+	bB.Reset()
+
+	// Sending messages on both connections
+	_, err = connA.Write([]byte(mA))
+	if err != nil {
+		t.Fatalf("sending message on connection a failed: %v", err)
+	}
+
+	_, err = connB.Write([]byte(mB))
+	if err != nil {
+		t.Fatalf("sending message on connection b failed: %v", err)
+	}
+
+	// Receiving messages on both connections
+	_, err = io.Copy(&bA, connA)
+	if err != nil {
+		t.Fatalf("receiving b message on connection a failed: %v", err)
+	}
+
+	_, err = io.Copy(&bB, connB)
+	if err != nil {
+		t.Fatalf("receiving a message on connection b failed: %v", err)
+	}
+
+	gotA := bA.String()
+	gotB := bB.String()
+
+	if gotA != wantA {
+		t.Errorf("connection A message received: got %q, want %q", gotA, wantA)
+	}
+	if gotB != wantB {
+		t.Errorf("connection B message received: got %q, want %q", gotB, wantB)
+	}
+}
