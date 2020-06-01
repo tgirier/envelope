@@ -1,7 +1,6 @@
 package chat_test
 
 import (
-	"net"
 	"testing"
 
 	"github.com/tgirier/chat"
@@ -17,15 +16,11 @@ func TestServerConn(t *testing.T) {
 	}
 	defer s.Close()
 
-	if !s.Running() {
-		t.Fatal("server not running")
-	}
-
-	conn, err := net.Dial("tcp", addr)
+	c, err := chat.Connect(addr)
 	if err != nil {
-		t.Fatalf("connection failed: %v", err)
+		t.Errorf("connection failed: %v", err)
 	}
-	defer conn.Close()
+	defer c.Close()
 }
 
 func TestServerClose(t *testing.T) {
