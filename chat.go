@@ -1,7 +1,6 @@
 package chat
 
 import (
-	"errors"
 	"log"
 	"net"
 	"sync"
@@ -14,6 +13,7 @@ type Server struct {
 }
 
 type Client struct {
+	connection net.Conn
 }
 
 func Start(addr string) (Server, error) {
@@ -55,7 +55,14 @@ func (s *Server) Close() {
 }
 
 func Connect(addr string) (Client, error) {
-	return Client{}, errors.New("")
+	conn, err := net.Dial("tcp", addr)
+	if err != nil {
+		return Client{}, err
+	}
+	c := Client{
+		connection: conn,
+	}
+	return c, nil
 }
 
 func (c *Client) Close() {
