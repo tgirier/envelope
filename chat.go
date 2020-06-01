@@ -52,6 +52,7 @@ func (s *Server) Close() {
 	s.Lock()
 	defer s.Unlock()
 	s.running = false
+	s.listener.Close()
 }
 
 func Connect(addr string) (Client, error) {
