@@ -1,6 +1,7 @@
 package chat
 
 import (
+	"errors"
 	"log"
 	"net"
 	"sync"
@@ -10,6 +11,9 @@ type Server struct {
 	sync.Mutex
 	listener net.Listener
 	running  bool
+}
+
+type Client struct {
 }
 
 func Start(addr string) (Server, error) {
@@ -48,4 +52,12 @@ func (s *Server) Close() {
 	s.Lock()
 	defer s.Unlock()
 	s.running = false
+}
+
+func Connect(addr string) (Client, error) {
+	return Client{}, errors.New("")
+}
+
+func (c *Client) Close() {
+
 }
