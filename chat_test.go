@@ -34,8 +34,10 @@ func TestServerClose(t *testing.T) {
 
 	s.Close()
 
-	if s.Running() {
-		t.Error("Failed")
+	c, err := chat.Connect(addr)
+	if err == nil {
+		t.Error("server still running")
+		defer c.Close()
 	}
 
 }
