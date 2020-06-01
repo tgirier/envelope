@@ -18,7 +18,7 @@ func TestServerConn(t *testing.T) {
 
 	c, err := chat.Connect(addr)
 	if err != nil {
-		t.Errorf("connection failed: %v", err)
+		t.Fatalf("connection failed: %v", err)
 	}
 	defer c.Close()
 }
