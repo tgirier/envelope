@@ -42,36 +42,33 @@ func TestServerClose(t *testing.T) {
 
 }
 
-// func TestWelcomeMessage(t *testing.T) {
-// 	t.Parallel()
+func TestWelcomeMessage(t *testing.T) {
+	t.Parallel()
 
-// 	addr := "localhost:8082"
-// 	want := "Welcome to ChatRoom !"
+	addr := "localhost:8082"
+	want := "Welcome to ChatRoom !"
 
-// 	s, err := chat.Start(addr)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	defer s.Close()
+	s, err := chat.Start(addr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Stop()
 
-// 	conn, err := net.Dial("tcp", addr)
-// 	if err != nil {
-// 		t.Fatalf("connection failed: %v", err)
-// 	}
-// 	defer conn.Close()
+	c, err := chat.Connect(addr)
+	if err != nil {
+		t.Fatalf("client connection failed: %v", err)
+	}
+	defer c.Close()
 
-// 	var b bytes.Buffer
-// 	_, err = io.Copy(&b, conn)
+	got, err := c.Read()
 
-// 	got := b.String()
-
-// 	if err != nil {
-// 		t.Fatalf("reading welcome message failed:  %v", err)
-// 	}
-// 	if got != want {
-// 		t.Errorf("welcome message: got %q, want %q", got, want)
-// 	}
-// }
+	if err != nil {
+		t.Fatalf("reading welcome message failed:  %v", err)
+	}
+	if got != want {
+		t.Errorf("welcome message: got %q, want %q", got, want)
+	}
+}
 
 // func TestAtoBMessage(t *testing.T) {
 // 	t.Parallel()
