@@ -67,7 +67,7 @@ func Connect(addr string) (Client, error) {
 }
 
 func (c *Client) Close() {
-
+	c.connection.Close()
 }
 
 func (c *Client) Read() (string, error) {
