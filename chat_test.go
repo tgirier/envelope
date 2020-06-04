@@ -14,7 +14,7 @@ func TestServerConn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer s.Close()
+	defer s.Stop()
 
 	c, err := chat.Connect(addr)
 	if err != nil {
@@ -32,7 +32,7 @@ func TestServerClose(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	s.Close()
+	s.Stop()
 
 	c, err := chat.Connect(addr)
 	if err == nil {

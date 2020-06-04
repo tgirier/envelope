@@ -48,7 +48,7 @@ func (s *Server) Running() bool {
 	return s.running
 }
 
-func (s *Server) Close() {
+func (s *Server) Stop() {
 	s.Lock()
 	defer s.Unlock()
 	s.running = false
