@@ -69,3 +69,7 @@ func Connect(addr string) (Client, error) {
 func (c *Client) Close() {
 
 }
+
+func (c *Client) Read() (string, error) {
+	return "", nil
+}
