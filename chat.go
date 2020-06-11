@@ -19,11 +19,11 @@ type Client struct {
 	connection net.Conn
 }
 
-// Start returns a running chat server
-func Start(addr string) (Server, error) {
+// Start returns a pointer to a running server
+func Start(addr string) (*Server, error) {
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
-		return Server{}, err
+		return &Server{}, err
 	}
 
 	s := Server{
@@ -32,7 +32,7 @@ func Start(addr string) (Server, error) {
 	}
 
 	go s.Run()
-	return s, nil
+	return &s, nil
 }
 
 // Run implements the logic handling connections
