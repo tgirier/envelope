@@ -1,3 +1,4 @@
+// Package chat implements a chat server & client
 package chat
 
 import (
@@ -6,16 +7,19 @@ import (
 	"sync"
 )
 
+// Server represents a chat server
 type Server struct {
 	sync.Mutex
 	listener net.Listener
 	running  bool
 }
 
+// Client represents a chat client
 type Client struct {
 	connection net.Conn
 }
 
+// Start returns a running chat server
 func Start(addr string) (Server, error) {
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -31,6 +35,7 @@ func Start(addr string) (Server, error) {
 	return s, nil
 }
 
+// Run implements the logic handling connections
 func (s *Server) Run() {
 	conn, err := s.listener.Accept()
 	if !s.Running() {
@@ -42,12 +47,14 @@ func (s *Server) Run() {
 	}
 }
 
+// Running indicates if the server can accept connections
 func (s *Server) Running() bool {
 	s.Lock()
 	defer s.Unlock()
 	return s.running
 }
 
+// Stop stops a running server
 func (s *Server) Stop() {
 	s.Lock()
 	defer s.Unlock()
@@ -55,6 +62,7 @@ func (s *Server) Stop() {
 	s.listener.Close()
 }
 
+// Connect returns a new client with a connection to the server
 func Connect(addr string) (Client, error) {
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
@@ -66,10 +74,12 @@ func Connect(addr string) (Client, error) {
 	return c, nil
 }
 
+// Close close the connection between the client and the server
 func (c *Client) Close() {
 	c.connection.Close()
 }
 
+// Read reads message received by the client
 func (c *Client) Read() (string, error) {
 	return "", nil
 }
