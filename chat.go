@@ -64,12 +64,12 @@ func (s *Server) Stop() {
 }
 
 // Connect returns a new client with a connection to the server
-func Connect(addr string) (Client, error) {
+func Connect(addr string) (*Client, error) {
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
-		return Client{}, err
+		return &Client{}, err
 	}
-	c := Client{
+	c := &Client{
 		connection: conn,
 	}
 	return c, nil
