@@ -3,7 +3,6 @@ package chat
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"sync"
 	"time"
@@ -55,7 +54,7 @@ func Start(addr string) (*Server, error) {
 func (s *Server) Run() {
 	conn, err := s.listener.Accept()
 	if err != nil {
-		log.Printf("connection failed: %v", err)
+		s.Logger.Log(fmt.Sprintf("connection failed: %v\n", err))
 		return
 	}
 	if !s.Running() {
