@@ -2,9 +2,11 @@
 package chat
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"sync"
+	"time"
 )
 
 // Server represents a chat server
@@ -12,6 +14,17 @@ type Server struct {
 	mutex    sync.Mutex
 	listener net.Listener
 	running  bool
+	Logger   Logger
+}
+
+// Logger enables a customization of the log function
+type Logger interface {
+	Log(s string)
+}
+
+// StandardLogger defines a standard logger that implements the Logger interface
+type StandardLogger struct {
+	timeFormat string
 }
 
 // Client represents a chat client
@@ -26,9 +39,12 @@ func Start(addr string) (*Server, error) {
 		return &Server{}, err
 	}
 
+	logger := NewStandardLogger(time.RFC3339)
+
 	s := &Server{
 		listener: ln,
 		running:  true,
+		Logger:   logger,
 	}
 
 	go s.Run()
@@ -83,4 +99,16 @@ func (c *Client) Close() {
 // Read reads message received by the client
 func (c *Client) Read() (string, error) {
 	return "", nil
+}
+
+// Log prints a standard log message
+func (l *StandardLogger) Log(s string) {
+	fmt.Printf("%s %s", time.Now().Format(l.timeFormat), s)
+}
+
+// NewStandardLogger returns a standard logger for the server
+func NewStandardLogger(timeFormat string) *StandardLogger {
+	return &StandardLogger{
+		timeFormat: timeFormat,
+	}
 }
