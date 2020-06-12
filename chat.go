@@ -26,24 +26,25 @@ func Start(addr string) (*Server, error) {
 		return &Server{}, err
 	}
 
-	s := Server{
+	s := &Server{
 		listener: ln,
 		running:  true,
 	}
 
 	go s.Run()
-	return &s, nil
+	return s, nil
 }
 
 // Run implements the logic handling connections
 func (s *Server) Run() {
 	conn, err := s.listener.Accept()
+	if err != nil {
+		log.Printf("connection failed: %v", err)
+		return
+	}
 	if !s.Running() {
 		conn.Close()
 		return
-	}
-	if err != nil {
-		log.Printf("connection failed: %v", err)
 	}
 }
 
