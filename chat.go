@@ -9,7 +9,7 @@ import (
 
 // Server represents a chat server
 type Server struct {
-	sync.Mutex
+	mutex    sync.Mutex
 	listener net.Listener
 	running  bool
 }
@@ -50,15 +50,15 @@ func (s *Server) Run() {
 
 // Running indicates if the server can accept connections
 func (s *Server) Running() bool {
-	s.Lock()
-	defer s.Unlock()
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	return s.running
 }
 
 // Stop stops a running server
 func (s *Server) Stop() {
-	s.Lock()
-	defer s.Unlock()
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	s.running = false
 	s.listener.Close()
 }
