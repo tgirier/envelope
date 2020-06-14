@@ -24,16 +24,15 @@ func TestServerConn(t *testing.T) {
 
 func TestServerClose(t *testing.T) {
 	t.Parallel()
-	addr := "localhost:8081"
 
-	s, err := chat.StartServer(addr)
+	s, err := chat.RandomPortServer()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	s.Stop()
 
-	c, err := chat.ConnectClient(addr)
+	c, err := chat.ConnectClient(s.ListenAddress)
 	if err == nil {
 		t.Error("server still running")
 		defer c.Close()
