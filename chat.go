@@ -31,8 +31,8 @@ type Client struct {
 	connection net.Conn
 }
 
-// Start returns a pointer to a running server
-func Start(addr string) (*Server, error) {
+// StartServer returns a pointer to a running server
+func StartServer(addr string) (*Server, error) {
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		return &Server{}, err

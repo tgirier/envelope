@@ -10,7 +10,7 @@ func TestServerConn(t *testing.T) {
 	t.Parallel()
 	addr := "localhost:8080"
 
-	s, err := chat.Start(addr)
+	s, err := chat.StartServer(addr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -27,7 +27,7 @@ func TestServerClose(t *testing.T) {
 	t.Parallel()
 	addr := "localhost:8081"
 
-	s, err := chat.Start(addr)
+	s, err := chat.StartServer(addr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,7 +48,7 @@ func TestWelcomeMessage(t *testing.T) {
 	addr := "localhost:8082"
 	want := "Welcome to ChatRoom !"
 
-	s, err := chat.Start(addr)
+	s, err := chat.StartServer(addr)
 	if err != nil {
 		t.Fatal(err)
 	}
