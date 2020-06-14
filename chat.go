@@ -3,6 +3,7 @@ package chat
 
 import (
 	"fmt"
+	"math/rand"
 	"net"
 	"sync"
 	"time"
@@ -10,10 +11,11 @@ import (
 
 // Server represents a chat server
 type Server struct {
-	mutex    sync.Mutex
-	listener net.Listener
-	running  bool
-	Logger   Logger
+	mutex         sync.Mutex
+	listener      net.Listener
+	running       bool
+	Logger        Logger
+	ListenAddress string
 }
 
 // Logger enables a customization of the log function
@@ -41,9 +43,10 @@ func StartServer(addr string) (*Server, error) {
 	logger := NewStandardLogger(time.RFC3339)
 
 	s := &Server{
-		listener: ln,
-		running:  true,
-		Logger:   logger,
+		listener:      ln,
+		running:       true,
+		Logger:        logger,
+		ListenAddress: addr,
 	}
 
 	go s.Run()
@@ -76,6 +79,16 @@ func (s *Server) Stop() {
 	defer s.mutex.Unlock()
 	s.running = false
 	s.listener.Close()
+}
+
+// RandomPortServer returns a server listening on a random port
+func RandomPortServer() (*Server, error) {
+	rand.Seed(time.Now().UnixNano())
+
+	p := 8080 + rand.Intn(10)
+	addr := fmt.Sprintf("localhost:%d", p)
+
+	return StartServer(addr)
 }
 
 // ConnectClient returns a new client with a connection to the server
