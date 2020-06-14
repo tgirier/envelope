@@ -8,15 +8,14 @@ import (
 
 func TestServerConn(t *testing.T) {
 	t.Parallel()
-	addr := "localhost:8080"
 
-	s, err := chat.StartServer(addr)
+	s, err := chat.RandomPortServer()
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer s.Stop()
 
-	c, err := chat.ConnectClient(addr)
+	c, err := chat.ConnectClient(s.ListenAddress)
 	if err != nil {
 		t.Fatalf("connection failed: %v", err)
 	}
