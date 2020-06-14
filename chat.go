@@ -78,8 +78,8 @@ func (s *Server) Stop() {
 	s.listener.Close()
 }
 
-// Connect returns a new client with a connection to the server
-func Connect(addr string) (*Client, error) {
+// ConnectClient returns a new client with a connection to the server
+func ConnectClient(addr string) (*Client, error) {
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
 		return &Client{}, err

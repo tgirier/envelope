@@ -16,7 +16,7 @@ func TestServerConn(t *testing.T) {
 	}
 	defer s.Stop()
 
-	c, err := chat.Connect(addr)
+	c, err := chat.ConnectClient(addr)
 	if err != nil {
 		t.Fatalf("connection failed: %v", err)
 	}
@@ -34,7 +34,7 @@ func TestServerClose(t *testing.T) {
 
 	s.Stop()
 
-	c, err := chat.Connect(addr)
+	c, err := chat.ConnectClient(addr)
 	if err == nil {
 		t.Error("server still running")
 		defer c.Close()
@@ -54,7 +54,7 @@ func TestWelcomeMessage(t *testing.T) {
 	}
 	defer s.Stop()
 
-	c, err := chat.Connect(addr)
+	c, err := chat.ConnectClient(addr)
 	if err != nil {
 		t.Fatalf("client connection failed: %v", err)
 	}
