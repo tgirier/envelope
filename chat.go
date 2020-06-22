@@ -66,7 +66,7 @@ func (s *Server) Run() {
 		conn.Close() // Not sure if it is still useful as listener.close closes all connections
 		return
 	}
-	_, err = conn.Write([]byte("Hello\n"))
+	_, err = conn.Write([]byte("Welcome to ChatRoom !\n"))
 	if err != nil {
 		s.Logger.Log(fmt.Sprintf("sending message failed: %v\n", err))
 	}
@@ -123,7 +123,6 @@ func (c *Client) Read() (string, error) {
 		return "", err
 	}
 	return strings.TrimSuffix(m, "\n"), nil
-
 }
 
 // Log prints a standard log message
