@@ -2,9 +2,11 @@
 package chat
 
 import (
+	"bufio"
 	"fmt"
 	"math/rand"
 	"net"
+	"strings"
 	"sync"
 	"time"
 )
@@ -64,7 +66,7 @@ func (s *Server) Run() {
 		conn.Close() // Not sure if it is still useful as listener.close closes all connections
 		return
 	}
-	_, err = conn.Write([]byte("Hello"))
+	_, err = conn.Write([]byte("Hello\n"))
 	if err != nil {
 		s.Logger.Log(fmt.Sprintf("sending message failed: %v\n", err))
 	}
@@ -114,7 +116,14 @@ func (c *Client) Close() {
 
 // Read reads message received by the client
 func (c *Client) Read() (string, error) {
-	return "", nil
+	r := bufio.NewReader(c.connection)
+
+	m, err := r.ReadString('\n')
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSuffix(m, "\n"), nil
+
 }
 
 // Log prints a standard log message
