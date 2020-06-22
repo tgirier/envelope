@@ -61,8 +61,12 @@ func (s *Server) Run() {
 		return
 	}
 	if !s.Running() {
-		conn.Close()
+		conn.Close() // Not sure if it is still useful as listener.close closes all connections
 		return
+	}
+	_, err = conn.Write([]byte("Hello"))
+	if err != nil {
+		s.Logger.Log(fmt.Sprintf("sending message failed: %v\n", err))
 	}
 }
 
