@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
-	"strings"
 	"sync"
 	"time"
 )
@@ -16,12 +15,12 @@ type Server struct {
 	mutex         sync.Mutex
 	listener      net.Listener
 	running       bool
-	Logger        Logger
+	Logger        logger // with standard logger can be extended with logrus
 	ListenAddress string
 }
 
 // Logger enables a customization of the log function
-type Logger interface {
+type logger interface {
 	Log(s string)
 }
 
@@ -70,6 +69,21 @@ func (s *Server) Run() {
 	if err != nil {
 		s.Logger.Log(fmt.Sprintf("sending message failed: %v\n", err))
 	}
+
+	r := bufio.NewReader(conn)
+
+	for s.Running() {
+		m, err := r.ReadString('\n')
+		if err != nil {
+			s.Logger.Log(fmt.Sprintf("receiving message failed: %v\n", err))
+		}
+		// fmt.Printf("server: message received %q", m)
+		_, err = fmt.Fprintf(conn, m)
+		if err != nil {
+			s.Logger.Log(fmt.Sprintf("sending message failed: %v\n", err))
+		}
+		// fmt.Printf("server: message sent %q", m)
+	}
 }
 
 // Running indicates if the server can accept connections
@@ -87,11 +101,18 @@ func (s *Server) Stop() {
 	s.listener.Close()
 }
 
+// ListenAndServe blocks while the server is running
+func (s *Server) ListenAndServe() {
+	for s.Running() {
+		time.Sleep(5 * time.Second)
+	}
+}
+
 // RandomPortServer returns a server listening on a random port
 func RandomPortServer() (*Server, error) {
 	rand.Seed(time.Now().UnixNano())
 
-	p := 8080 + rand.Intn(10)
+	p := 8080 + rand.Intn(20) // Add used port detection
 	addr := fmt.Sprintf("localhost:%d", p)
 
 	return StartServer(addr)
@@ -116,13 +137,20 @@ func (c *Client) Close() {
 
 // Read reads message received by the client
 func (c *Client) Read() (string, error) {
+	// Check for bufio.scanner
 	r := bufio.NewReader(c.connection)
 
 	m, err := r.ReadString('\n')
 	if err != nil {
 		return "", err
 	}
-	return strings.TrimSuffix(m, "\n"), nil
+	return m, nil
+}
+
+// Send sends message to the server
+func (c *Client) Send(m string) error {
+	_, err := fmt.Fprint(c.connection, m)
+	return err
 }
 
 // Log prints a standard log message
