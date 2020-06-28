@@ -125,6 +125,13 @@ func (s *Server) ListenAndServe() {
 	}
 }
 
+// WithPort customizes the port on which the server is listening
+func WithPort(p int) serverOption {
+	return func(s *Server) {
+		s.port = p
+	}
+}
+
 // ConnectClient returns a new client with a connection to the server
 func ConnectClient(addr string) (*Client, error) {
 	conn, err := net.Dial("tcp", addr)
