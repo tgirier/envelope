@@ -15,9 +15,14 @@ type Server struct {
 	mutex         sync.Mutex
 	listener      net.Listener
 	running       bool
+	host          string
+	port          int
 	Logger        logger // with standard logger can be extended with logrus
 	ListenAddress string
 }
+
+// serverOption defines functional options to customize the server
+type serverOption func(*Server)
 
 // Logger enables a customization of the log function
 type logger interface {
@@ -34,25 +39,57 @@ type Client struct {
 	connection net.Conn
 }
 
-// StartServer returns a pointer to a running server
-func StartServer(addr string) (*Server, error) {
-	ln, err := net.Listen("tcp", addr)
-	if err != nil {
-		return &Server{}, err
-	}
+// StartServer returns a pointer to a running server on localhost and random port
+func StartServer(options ...serverOption) (*Server, error) {
+
+	rand.Seed(time.Now().UnixNano())
+	p := 8080 + rand.Intn(100)
 
 	logger := NewStandardLogger(time.RFC3339)
 
 	s := &Server{
-		listener:      ln,
-		running:       true,
-		Logger:        logger,
-		ListenAddress: addr,
+		running: true,
+		host:    "localhost",
+		port:    p,
+		Logger:  logger,
 	}
+
+	for _, option := range options {
+		option(s)
+	}
+
+	s.ListenAddress = fmt.Sprintf(s.host+":%d", s.port)
+
+	ln, err := net.Listen("tcp", s.ListenAddress)
+	if err != nil {
+		return &Server{}, err
+	}
+
+	s.listener = ln
 
 	go s.Run()
 	return s, nil
 }
+
+// // StartServer returns a pointer to a running server
+// func StartServer(addr string) (*Server, error) {
+// 	ln, err := net.Listen("tcp", addr)
+// 	if err != nil {
+// 		return &Server{}, err
+// 	}
+
+// 	logger := NewStandardLogger(time.RFC3339)
+
+// 	s := &Server{
+// 		listener:      ln,
+// 		running:       true,
+// 		Logger:        logger,
+// 		ListenAddress: addr,
+// 	}
+
+// 	go s.Run()
+// 	return s, nil
+// }
 
 // Run implements the logic handling connections
 func (s *Server) Run() {
@@ -109,14 +146,14 @@ func (s *Server) ListenAndServe() {
 }
 
 // RandomPortServer returns a server listening on a random port
-func RandomPortServer() (*Server, error) {
-	rand.Seed(time.Now().UnixNano())
+// func RandomPortServer() (*Server, error) {
+// 	rand.Seed(time.Now().UnixNano())
 
-	p := 8080 + rand.Intn(20) // Add used port detection
-	addr := fmt.Sprintf("localhost:%d", p)
+// 	p := 8080 + rand.Intn(20) // Add used port detection
+// 	addr := fmt.Sprintf("localhost:%d", p)
 
-	return StartServer(addr)
-}
+// 	return StartServer(addr)
+// }
 
 // ConnectClient returns a new client with a connection to the server
 func ConnectClient(addr string) (*Client, error) {

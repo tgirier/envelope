@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	s, err := chat.RandomPortServer()
+	s, err := chat.StartServer()
 	if err != nil {
 		log.Fatalln("failed starting server")
 	}

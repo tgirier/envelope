@@ -16,7 +16,7 @@ func (l *myLogger) Log(s string) {
 func TestServerConn(t *testing.T) {
 	t.Parallel()
 
-	s, err := chat.RandomPortServer()
+	s, err := chat.StartServer()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,7 +34,7 @@ func TestServerConn(t *testing.T) {
 func TestServerClose(t *testing.T) {
 	t.Parallel()
 
-	s, err := chat.RandomPortServer()
+	s, err := chat.StartServer()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +54,7 @@ func TestWelcomeMessage(t *testing.T) {
 
 	want := "Welcome to ChatRoom !\n"
 
-	s, err := chat.RandomPortServer()
+	s, err := chat.StartServer()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -129,7 +129,7 @@ func TestMultipleAndEcho(t *testing.T) {
 }
 
 func startServerAndClient(t *testing.T) (*chat.Server, *chat.Client) {
-	s, err := chat.RandomPortServer()
+	s, err := chat.StartServer()
 	if err != nil {
 		t.Fatal(err)
 	}
