@@ -43,7 +43,7 @@ type Client struct {
 func StartServer(options ...serverOption) (*Server, error) {
 
 	rand.Seed(time.Now().UnixNano())
-	p := 8080 + rand.Intn(100)
+	p := 8080 + rand.Intn(100) // Add used port detection
 
 	logger := NewStandardLogger(time.RFC3339)
 
@@ -70,26 +70,6 @@ func StartServer(options ...serverOption) (*Server, error) {
 	go s.Run()
 	return s, nil
 }
-
-// // StartServer returns a pointer to a running server
-// func StartServer(addr string) (*Server, error) {
-// 	ln, err := net.Listen("tcp", addr)
-// 	if err != nil {
-// 		return &Server{}, err
-// 	}
-
-// 	logger := NewStandardLogger(time.RFC3339)
-
-// 	s := &Server{
-// 		listener:      ln,
-// 		running:       true,
-// 		Logger:        logger,
-// 		ListenAddress: addr,
-// 	}
-
-// 	go s.Run()
-// 	return s, nil
-// }
 
 // Run implements the logic handling connections
 func (s *Server) Run() {
@@ -144,16 +124,6 @@ func (s *Server) ListenAndServe() {
 		time.Sleep(5 * time.Second)
 	}
 }
-
-// RandomPortServer returns a server listening on a random port
-// func RandomPortServer() (*Server, error) {
-// 	rand.Seed(time.Now().UnixNano())
-
-// 	p := 8080 + rand.Intn(20) // Add used port detection
-// 	addr := fmt.Sprintf("localhost:%d", p)
-
-// 	return StartServer(addr)
-// }
 
 // ConnectClient returns a new client with a connection to the server
 func ConnectClient(addr string) (*Client, error) {
