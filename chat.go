@@ -21,9 +21,6 @@ type Server struct {
 	ListenAddress string
 }
 
-// serverOption defines functional options to customize the server
-type serverOption func(*Server)
-
 // Logger enables a customization of the log function
 type logger interface {
 	Println(v ...interface{})
@@ -40,7 +37,7 @@ type Client struct {
 }
 
 // StartServer returns a pointer to a running server on localhost and random port
-func StartServer(options ...serverOption) (*Server, error) {
+func StartServer(options ...func(*Server)) (*Server, error) {
 
 	rand.Seed(time.Now().UnixNano())
 	p := 8080 + rand.Intn(100) // Add used port detection
@@ -126,14 +123,14 @@ func (s *Server) ListenAndServe() {
 }
 
 // WithPort customizes the port on which the server is listening
-func WithPort(p int) serverOption {
+func WithPort(p int) func(*Server) {
 	return func(s *Server) {
 		s.port = p
 	}
 }
 
 // WithHost customizes the host on which the server is listening
-func WithHost(h string) serverOption {
+func WithHost(h string) func(*Server) {
 	return func(s *Server) {
 		s.host = h
 	}
