@@ -26,7 +26,7 @@ type serverOption func(*Server)
 
 // Logger enables a customization of the log function
 type logger interface {
-	Log(s string)
+	Println(v ...interface{})
 }
 
 // StandardLogger defines a standard logger that implements the Logger interface
@@ -75,7 +75,7 @@ func StartServer(options ...serverOption) (*Server, error) {
 func (s *Server) Run() {
 	conn, err := s.listener.Accept()
 	if err != nil {
-		s.Logger.Log(fmt.Sprintf("connection failed: %v\n", err))
+		s.Logger.Println(fmt.Sprintf("connection failed: %v", err))
 		return
 	}
 	if !s.Running() {
@@ -84,7 +84,7 @@ func (s *Server) Run() {
 	}
 	_, err = conn.Write([]byte("Welcome to ChatRoom !\n"))
 	if err != nil {
-		s.Logger.Log(fmt.Sprintf("sending message failed: %v\n", err))
+		s.Logger.Println(fmt.Sprintf("sending message failed: %v", err))
 	}
 
 	r := bufio.NewReader(conn)
@@ -92,12 +92,12 @@ func (s *Server) Run() {
 	for s.Running() {
 		m, err := r.ReadString('\n')
 		if err != nil {
-			s.Logger.Log(fmt.Sprintf("receiving message failed: %v\n", err))
+			s.Logger.Println(fmt.Sprintf("receiving message failed: %v", err))
 		}
 		// fmt.Printf("server: message received %q", m)
 		_, err = fmt.Fprintf(conn, m)
 		if err != nil {
-			s.Logger.Log(fmt.Sprintf("sending message failed: %v\n", err))
+			s.Logger.Println(fmt.Sprintf("sending message failed: %v", err))
 		}
 		// fmt.Printf("server: message sent %q", m)
 	}
@@ -174,9 +174,15 @@ func (c *Client) Send(m string) error {
 	return err
 }
 
-// Log prints a standard log message
-func (l *StandardLogger) Log(s string) {
-	fmt.Printf("%s %s", time.Now().Format(l.timeFormat), s)
+// Println prints a standard log message on a line
+func (l *StandardLogger) Println(v ...interface{}) {
+	s := fmt.Sprintf("%s", time.Now().Format(l.timeFormat))
+
+	for _, value := range v {
+		s += fmt.Sprintf(" %s ", value)
+	}
+
+	fmt.Println(s)
 }
 
 // NewStandardLogger returns a standard logger for the server

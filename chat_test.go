@@ -10,8 +10,8 @@ import (
 type myLogger struct {
 }
 
-func (l *myLogger) Log(s string) {
-	log.Printf("log: %s", s)
+func (l *myLogger) Println(v ...interface{}) {
+	log.Printf("log: %s", v)
 }
 func TestServerConn(t *testing.T) {
 	t.Parallel()
