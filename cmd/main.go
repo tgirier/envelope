@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	s, err := chat.StartServer(chat.WithPort(8080))
+	s, err := chat.StartServer(chat.WithPort(8080), chat.WithHost("127.0.0.1"))
 	if err != nil {
 		log.Fatalln("failed starting server")
 	}

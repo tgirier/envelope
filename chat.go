@@ -132,6 +132,13 @@ func WithPort(p int) serverOption {
 	}
 }
 
+// WithHost customizes the host on which the server is listening
+func WithHost(h string) serverOption {
+	return func(s *Server) {
+		s.host = h
+	}
+}
+
 // ConnectClient returns a new client with a connection to the server
 func ConnectClient(addr string) (*Client, error) {
 	conn, err := net.Dial("tcp", addr)
