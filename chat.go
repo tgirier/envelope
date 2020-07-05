@@ -18,12 +18,12 @@ type Server struct {
 	running       bool
 	host          string
 	port          int
-	Logger        logger // with standard logger can be extended with logrus
+	Logger        Logger // with standard logger can be extended with logrus
 	ListenAddress string
 }
 
 // Logger enables a customization of the log function
-type logger interface {
+type Logger interface {
 	Println(v ...interface{})
 }
 
