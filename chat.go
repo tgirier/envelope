@@ -5,8 +5,10 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"math/rand"
 	"net"
+	"os"
 	"sync"
 	"time"
 )
@@ -27,11 +29,6 @@ type Logger interface {
 	Println(v ...interface{})
 }
 
-// StandardLogger defines a standard logger that implements the Logger interface
-type StandardLogger struct {
-	timeFormat string
-}
-
 // Client represents a chat client
 type Client struct {
 	connection net.Conn
@@ -43,7 +40,7 @@ func StartServer(options ...func(*Server)) (*Server, error) {
 	rand.Seed(time.Now().UnixNano())
 	p := 8080 + rand.Intn(100) // Add used port detection
 
-	logger := NewStandardLogger(time.RFC3339)
+	logger := log.New(os.Stderr, "", log.LstdFlags)
 
 	s := &Server{
 		running: true,
@@ -175,22 +172,4 @@ func (c *Client) Read() (string, error) {
 func (c *Client) Send(m string) error {
 	_, err := fmt.Fprint(c.connection, m)
 	return err
-}
-
-// Println prints a standard log message on a line
-func (l *StandardLogger) Println(v ...interface{}) {
-	s := fmt.Sprintf("%s", time.Now().Format(l.timeFormat))
-
-	for _, value := range v {
-		s += fmt.Sprintf(" %s ", value)
-	}
-
-	fmt.Println(s)
-}
-
-// NewStandardLogger returns a standard logger for the server
-func NewStandardLogger(timeFormat string) *StandardLogger {
-	return &StandardLogger{
-		timeFormat: timeFormat,
-	}
 }
