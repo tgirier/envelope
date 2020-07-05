@@ -4,6 +4,7 @@ package chat
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"math/rand"
 	"net"
 	"sync"
@@ -88,6 +89,11 @@ func (s *Server) Run() {
 
 	for s.Running() {
 		m, err := r.ReadString('\n')
+		if err == io.EOF {
+			s.Logger.Println(fmt.Sprintf("client connection closed: %v", err))
+			conn.Close()
+			break
+		}
 		if err != nil {
 			s.Logger.Println(fmt.Sprintf("receiving message failed: %v", err))
 		}
