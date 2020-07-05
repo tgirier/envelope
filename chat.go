@@ -13,13 +13,13 @@ import (
 
 // Server represents a chat server
 type Server struct {
+	Logger        Logger // with standard logger can be extended with logrus
+	ListenAddress string
 	mutex         sync.Mutex
 	listener      net.Listener
 	running       bool
 	host          string
 	port          int
-	Logger        Logger // with standard logger can be extended with logrus
-	ListenAddress string
 }
 
 // Logger enables a customization of the log function
