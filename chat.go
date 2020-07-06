@@ -33,7 +33,7 @@ type Logger interface {
 func StartServer(options ...func(*Server)) (*Server, error) {
 
 	rand.Seed(time.Now().UnixNano())
-	p := 8080 + rand.Intn(100) // Add used port detection
+	p := 49152 + rand.Intn(16383) // Add used port detection
 
 	logger := log.New(os.Stderr, "", log.LstdFlags)
 
