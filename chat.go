@@ -29,6 +29,25 @@ type Logger interface {
 	Println(v ...interface{})
 }
 
+// NewServer returns a pointer to a new server on localhost and random port
+func NewServer() *Server {
+	rand.Seed(time.Now().UnixNano())
+	p := 49152 + rand.Intn(16383) // Add used port detection
+
+	logger := log.New(os.Stderr, "", log.LstdFlags)
+
+	s := &Server{
+		running: true,
+		host:    "localhost",
+		port:    p,
+		Logger:  logger,
+	}
+
+	s.ListenAddress = fmt.Sprintf(s.host+":%d", s.port)
+
+	return s
+}
+
 // StartServer returns a pointer to a running server on localhost and random port
 func StartServer(options ...func(*Server)) (*Server, error) {
 
