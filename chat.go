@@ -132,6 +132,14 @@ func (s *Server) Stop() {
 	s.listener.Close()
 }
 
+// Close closes all connection to the server
+func (s *Server) Close() {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	s.running = false
+	s.listener.Close()
+}
+
 // ListenAndServe blocks while the server is running
 func (s *Server) ListenAndServe() {
 	for s.Running() {
