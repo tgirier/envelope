@@ -19,19 +19,35 @@ func TestServerConn(t *testing.T) {
 	s := chat.NewServer()
 	s.Logger = &myLogger{} // look at logrus
 
+	errChan := make(chan error)
+	done := make(chan struct{})
+
 	go func() {
 		err := s.ListenAndServe()
 		if err != nil {
-			t.Fatal(err)
+			errChan <- err
 		}
 	}()
 	defer s.Close()
 
-	c, err := chat.ConnectClient(s.ListenAddress)
-	if err != nil {
-		t.Fatalf("connection failed: %v", err)
+	go func() {
+		c, err := chat.ConnectClient(s.ListenAddress)
+		if err != nil {
+			errChan <- err
+			return
+		}
+		defer c.Close()
+		close(done)
+	}()
+
+	for {
+		select {
+		case err := <-errChan:
+			t.Fatalf("connection failed: %v", err)
+		case <-done:
+			return
+		}
 	}
-	defer c.Close()
 }
 
 func TestServerClose(t *testing.T) {
