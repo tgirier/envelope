@@ -141,10 +141,20 @@ func (s *Server) Close() {
 }
 
 // ListenAndServe blocks while the server is running
-func (s *Server) ListenAndServe() {
-	for s.Running() {
-		time.Sleep(5 * time.Second)
+func (s *Server) ListenAndServe() error {
+	// for s.Running() {
+	// 	time.Sleep(5 * time.Second)
+	// }
+	
+	ln, err := net.Listen("tcp", s.ListenAddress)
+	if err != nil {
+		return err
 	}
+	s.listener = ln
+
+	go s.Run()
+			
+	return nil
 }
 
 // WithPort customizes the port on which the server is listening
