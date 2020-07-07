@@ -26,6 +26,7 @@ func TestServerConn(t *testing.T) {
 		err := s.ListenAndServe()
 		if err != nil {
 			errChan <- err
+			return
 		}
 	}()
 	defer s.Close()
