@@ -16,13 +16,16 @@ func (l *myLogger) Println(v ...interface{}) {
 func TestServerConn(t *testing.T) {
 	t.Parallel()
 
-	s, err := chat.StartServer()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer s.Stop()
-
+	s := chat.NewServer()
 	s.Logger = &myLogger{} // look at logrus
+
+	go func() {
+		err := s.ListenAndServe()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
+	defer s.Close()
 
 	c, err := chat.ConnectClient(s.ListenAddress)
 	if err != nil {
