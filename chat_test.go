@@ -100,11 +100,6 @@ func TestWelcomeMessage(t *testing.T) {
 		}
 		close(runningChan)
 	}()
-	// s, err := chat.StartServer()
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	// defer s.Stop()
 
 	select {
 	case err := <-errChan:
@@ -126,30 +121,6 @@ func TestWelcomeMessage(t *testing.T) {
 	if got != want {
 		t.Errorf("welcome message: got %q, want %q", got, want)
 	}
-	// t.Parallel()
-
-	// want := "Welcome to ChatRoom !\n"
-
-	// s, err := chat.StartServer()
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	// defer s.Stop()
-
-	// c, err := chat.ConnectClient(s.ListenAddress)
-	// if err != nil {
-	// 	t.Fatalf("client connection failed: %v", err)
-	// }
-	// defer c.Close()
-
-	// got, err := c.Read()
-
-	// if err != nil {
-	// 	t.Fatalf("reading welcome message failed:  %v", err)
-	// }
-	// if got != want {
-	// 	t.Errorf("welcome message: got %q, want %q", got, want)
-	// }
 }
 
 // func TestSendMessageAndEcho(t *testing.T) {
