@@ -17,11 +17,11 @@ import (
 type Server struct {
 	Logger        Logger // with standard logger can be extended with logrus
 	ListenAddress string
+	Host          string
+	Port          int
 	mutex         sync.Mutex
 	listener      net.Listener
 	running       bool
-	host          string
-	port          int
 }
 
 // Logger enables a customization of the log function
@@ -37,13 +37,13 @@ func NewServer() *Server {
 	logger := log.New(os.Stderr, "", log.LstdFlags)
 
 	s := &Server{
-		running: false,
-		host:    "localhost",
-		port:    p,
+		Host:    "localhost",
+		Port:    p,
 		Logger:  logger,
+		running: false,
 	}
 
-	s.ListenAddress = fmt.Sprintf(s.host+":%d", s.port)
+	s.ListenAddress = fmt.Sprintf(s.Host+":%d", s.Port)
 
 	return s
 }
@@ -159,13 +159,13 @@ func (s *Server) ListenAndServe() error {
 // WithPort customizes the port on which the server is listening
 func WithPort(p int) func(*Server) {
 	return func(s *Server) {
-		s.port = p
+		s.Port = p
 	}
 }
 
 // WithHost customizes the host on which the server is listening
 func WithHost(h string) func(*Server) {
 	return func(s *Server) {
-		s.host = h
+		s.Host = h
 	}
 }
