@@ -48,37 +48,37 @@ func NewServer() *Server {
 	return s
 }
 
-// StartServer returns a pointer to a running server on localhost and random port
-func StartServer(options ...func(*Server)) (*Server, error) {
+// // StartServer returns a pointer to a running server on localhost and random port
+// func StartServer(options ...func(*Server)) (*Server, error) {
 
-	rand.Seed(time.Now().UnixNano())
-	p := 49152 + rand.Intn(16383) // Add used port detection
+// 	rand.Seed(time.Now().UnixNano())
+// 	p := 49152 + rand.Intn(16383) // Add used port detection
 
-	logger := log.New(os.Stderr, "", log.LstdFlags)
+// 	logger := log.New(os.Stderr, "", log.LstdFlags)
 
-	s := &Server{
-		running: true,
-		host:    "localhost",
-		port:    p,
-		Logger:  logger,
-	}
+// 	s := &Server{
+// 		running: true,
+// 		host:    "localhost",
+// 		port:    p,
+// 		Logger:  logger,
+// 	}
 
-	for _, option := range options {
-		option(s)
-	}
+// 	for _, option := range options {
+// 		option(s)
+// 	}
 
-	s.ListenAddress = fmt.Sprintf(s.host+":%d", s.port)
+// 	s.ListenAddress = fmt.Sprintf(s.host+":%d", s.port)
 
-	ln, err := net.Listen("tcp", s.ListenAddress)
-	if err != nil {
-		return &Server{}, err
-	}
+// 	ln, err := net.Listen("tcp", s.ListenAddress)
+// 	if err != nil {
+// 		return &Server{}, err
+// 	}
 
-	s.listener = ln
+// 	s.listener = ln
 
-	go s.Run()
-	return s, nil
-}
+// 	go s.Run()
+// 	return s, nil
+// }
 
 // Run implements the logic handling connections
 func (s *Server) Run() {
@@ -124,13 +124,13 @@ func (s *Server) Running() bool {
 	return s.running
 }
 
-// Stop stops a running server
-func (s *Server) Stop() {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	s.running = false
-	s.listener.Close()
-}
+// // Stop stops a running server
+// func (s *Server) Stop() {
+// 	s.mutex.Lock()
+// 	defer s.mutex.Unlock()
+// 	s.running = false
+// 	s.listener.Close()
+// }
 
 // Close closes all connection to the server
 func (s *Server) Close() {
