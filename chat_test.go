@@ -38,13 +38,11 @@ func TestServerConn(t *testing.T) {
 		close(done)
 	}()
 
-	for {
-		select {
-		case err := <-errChan:
-			t.Fatalf("connection failed: %v", err)
-		case <-done:
-			return
-		}
+	select {
+	case err := <-errChan:
+		t.Fatalf("connection failed: %v", err)
+	case <-done:
+		return
 	}
 }
 
