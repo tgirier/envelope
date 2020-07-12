@@ -24,11 +24,7 @@ func TestServerConn(t *testing.T) {
 	done := make(chan struct{})
 
 	go func() {
-		err := s.ListenAndServe()
-		if err != nil {
-			errChan <- err
-			return
-		}
+		errChan <- s.ListenAndServe()
 	}()
 	defer s.Close()
 
