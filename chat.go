@@ -157,17 +157,3 @@ func (s *Server) ListenAndServe() error {
 func (s *Server) ListenAddress() string {
 	return fmt.Sprintf(s.Host+":%d", s.Port)
 }
-
-// WithPort customizes the port on which the server is listening
-func WithPort(p int) func(*Server) {
-	return func(s *Server) {
-		s.Port = p
-	}
-}
-
-// WithHost customizes the host on which the server is listening
-func WithHost(h string) func(*Server) {
-	return func(s *Server) {
-		s.Host = h
-	}
-}
