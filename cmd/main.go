@@ -19,12 +19,4 @@ func main() {
 	if err != nil {
 		log.Fatalln("failed starting server")
 	}
-
-	// s, err := chat.StartServer(chat.WithPort(8080), chat.WithHost("127.0.0.1"))
-	// if err != nil {
-	// 	log.Fatalln("failed starting server")
-	// }
-	// fmt.Println(s.ListenAddress)
-
-	// s.ListenAndServe()
 }

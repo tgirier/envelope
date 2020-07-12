@@ -15,8 +15,7 @@ import (
 
 // Server represents a chat server
 type Server struct {
-	Logger Logger // with standard logger can be extended with logrus
-	// ListenAddress string
+	Logger   Logger // with standard logger can be extended with logrus
 	Host     string
 	Port     int
 	mutex    sync.Mutex
