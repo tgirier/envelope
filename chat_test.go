@@ -3,6 +3,7 @@ package chat_test
 import (
 	"log"
 	"testing"
+	"time"
 
 	"github.com/tgirier/chat"
 )
@@ -54,19 +55,34 @@ func TestServerConn(t *testing.T) {
 func TestServerClose(t *testing.T) {
 	t.Parallel()
 
-	s, err := chat.StartServer()
-	if err != nil {
-		t.Fatal(err)
-	}
+	s := chat.NewServer()
 
-	s.Stop()
+	errChan := make(chan error)
+	runningChan := make(chan struct{})
+
+	go func() {
+		errChan <- s.ListenAndServe()
+	}()
+
+	go func() {
+		for !s.Running() {
+			time.Sleep(10 * time.Millisecond)
+		}
+		close(runningChan)
+	}()
+
+	select {
+	case err := <-errChan:
+		t.Fatalf("starting server failed: %v", err)
+	case <-runningChan:
+		s.Close()
+	}
 
 	c, err := chat.ConnectClient(s.ListenAddress)
 	if err == nil {
 		t.Error("server still running")
 		defer c.Close()
 	}
-
 }
 
 func TestWelcomeMessage(t *testing.T) {

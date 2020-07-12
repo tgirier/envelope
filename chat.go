@@ -37,7 +37,7 @@ func NewServer() *Server {
 	logger := log.New(os.Stderr, "", log.LstdFlags)
 
 	s := &Server{
-		running: true,
+		running: false,
 		host:    "localhost",
 		port:    p,
 		Logger:  logger,
@@ -142,18 +142,17 @@ func (s *Server) Close() {
 
 // ListenAndServe blocks while the server is running
 func (s *Server) ListenAndServe() error {
-	// for s.Running() {
-	// 	time.Sleep(5 * time.Second)
-	// }
-	
 	ln, err := net.Listen("tcp", s.ListenAddress)
 	if err != nil {
 		return err
 	}
+	s.mutex.Lock()
 	s.listener = ln
+	s.running = true
+	s.mutex.Unlock()
 
-	go s.Run()
-			
+	s.Run()
+
 	return nil
 }
 
