@@ -29,7 +29,7 @@ func TestServerConn(t *testing.T) {
 	defer s.Close()
 
 	go func() {
-		c, err := chat.ConnectClient(s.ListenAddress)
+		c, err := chat.ConnectClient(s.ListenAddress())
 		if err != nil {
 			errChan <- err
 			return
@@ -72,7 +72,7 @@ func TestServerClose(t *testing.T) {
 		s.Close()
 	}
 
-	c, err := chat.ConnectClient(s.ListenAddress)
+	c, err := chat.ConnectClient(s.ListenAddress())
 	if err == nil {
 		t.Error("server still running")
 		defer c.Close()
@@ -107,7 +107,7 @@ func TestWelcomeMessage(t *testing.T) {
 	case <-runningChan:
 	}
 
-	c, err := chat.ConnectClient(s.ListenAddress)
+	c, err := chat.ConnectClient(s.ListenAddress())
 	if err != nil {
 		t.Fatalf("client connection failed: %v", err)
 	}
@@ -180,7 +180,7 @@ func TestWelcomeMessage(t *testing.T) {
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	c, err := chat.ConnectClient(s.ListenAddress)
+// 	c, err := chat.ConnectClient(s.ListenAddress())
 // 	if err != nil {
 // 		t.Fatalf("client connection failed: %v", err)
 // 	}

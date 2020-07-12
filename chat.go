@@ -15,13 +15,13 @@ import (
 
 // Server represents a chat server
 type Server struct {
-	Logger        Logger // with standard logger can be extended with logrus
-	ListenAddress string
-	Host          string
-	Port          int
-	mutex         sync.Mutex
-	listener      net.Listener
-	running       bool
+	Logger Logger // with standard logger can be extended with logrus
+	// ListenAddress string
+	Host     string
+	Port     int
+	mutex    sync.Mutex
+	listener net.Listener
+	running  bool
 }
 
 // Logger enables a customization of the log function
@@ -42,8 +42,6 @@ func NewServer() *Server {
 		Logger:  logger,
 		running: false,
 	}
-
-	s.ListenAddress = fmt.Sprintf(s.Host+":%d", s.Port)
 
 	return s
 }
@@ -142,7 +140,7 @@ func (s *Server) Close() {
 
 // ListenAndServe blocks while the server is running
 func (s *Server) ListenAndServe() error {
-	ln, err := net.Listen("tcp", s.ListenAddress)
+	ln, err := net.Listen("tcp", s.ListenAddress())
 	if err != nil {
 		return err
 	}
@@ -154,6 +152,11 @@ func (s *Server) ListenAndServe() error {
 	s.Run()
 
 	return nil
+}
+
+// ListenAddress returns the address on which the server is listening
+func (s *Server) ListenAddress() string {
+	return fmt.Sprintf(s.Host+":%d", s.Port)
 }
 
 // WithPort customizes the port on which the server is listening
