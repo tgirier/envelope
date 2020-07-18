@@ -15,12 +15,13 @@ import (
 
 // Server represents a chat server
 type Server struct {
-	Logger   Logger // with standard logger can be extended with logrus
-	Host     string
-	Port     int
-	mutex    sync.Mutex
-	listener net.Listener
-	running  bool
+	Logger         Logger // with standard logger can be extended with logrus
+	Host           string
+	Port           int
+	WelcomeMessage string
+	mutex          sync.Mutex
+	listener       net.Listener
+	running        bool
 }
 
 // Logger enables a customization of the log function
@@ -36,10 +37,11 @@ func NewServer() *Server {
 	logger := log.New(os.Stderr, "", log.LstdFlags)
 
 	s := &Server{
-		Host:    "localhost",
-		Port:    p,
-		Logger:  logger,
-		running: false,
+		Host:           "localhost",
+		Port:           p,
+		Logger:         logger,
+		WelcomeMessage: "Welcome to Chat Room!",
+		running:        false,
 	}
 
 	return s
@@ -88,7 +90,7 @@ func (s *Server) Run() {
 		conn.Close() // Not sure if it is still useful as listener.close closes all connections
 		return
 	}
-	_, err = conn.Write([]byte("Welcome to ChatRoom !\n"))
+	_, err = conn.Write([]byte(s.WelcomeMessage + "\n"))
 	if err != nil {
 		s.Logger.Println(fmt.Sprintf("sending message failed: %v", err))
 	}

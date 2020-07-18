@@ -82,12 +82,13 @@ func TestServerClose(t *testing.T) {
 func TestWelcomeMessage(t *testing.T) {
 	t.Parallel()
 
-	want := "Welcome to ChatRoom !\n"
+	want := "Welcome to Thibaut's chat !\n"
 
 	errChan := make(chan error)
 	runningChan := make(chan struct{})
 
 	s := chat.NewServer()
+	s.WelcomeMessage = want
 
 	go func() {
 		errChan <- s.ListenAndServe()
