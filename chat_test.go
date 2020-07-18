@@ -123,28 +123,28 @@ func TestWelcomeMessage(t *testing.T) {
 	}
 }
 
-// func TestSendMessageAndEcho(t *testing.T) {
-// 	t.Parallel()
+func TestSendMessageAndEcho(t *testing.T) {
+	t.Parallel()
 
-// 	s, c := startServerAndClient(t)
-// 	defer s.Stop()
-// 	defer c.Close()
+	s, c := startServerAndClient(t)
+	defer s.Close()
+	defer c.Close()
 
-// 	c.Read()
+	c.Read()
 
-// 	want := "Hello all\n"
+	want := "Hello all\n"
 
-// 	c.Send(want)
-// 	got, err := c.Read() // check for loop
+	c.Send(want)
+	got, err := c.Read() // check for loop
 
-// 	if err != nil {
-// 		t.Fatalf("reading welcome message failed:  %v", err)
-// 	}
-// 	if got != want {
-// 		t.Errorf("sent message: got %q, want %q", got, want)
-// 	}
+	if err != nil {
+		t.Fatalf("reading welcome message failed:  %v", err)
+	}
+	if got != want {
+		t.Errorf("sent message: got %q, want %q", got, want)
+	}
 
-// }
+}
 
 // func TestMultipleAndEcho(t *testing.T) {
 // 	t.Parallel()
