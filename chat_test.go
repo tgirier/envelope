@@ -175,17 +175,35 @@ func TestWelcomeMessage(t *testing.T) {
 
 // }
 
-// func startServerAndClient(t *testing.T) (*chat.Server, *chat.Client) {
-// 	s, err := chat.StartServer()
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	c, err := chat.ConnectClient(s.ListenAddress())
-// 	if err != nil {
-// 		t.Fatalf("client connection failed: %v", err)
-// 	}
-// 	return s, c
-// }
+func startServerAndClient(t *testing.T) (*chat.Server, *chat.Client) {
+	s := chat.NewServer()
+
+	errChan := make(chan error)
+	runningChan := make(chan struct{})
+
+	go func() {
+		errChan <- s.ListenAndServe()
+	}()
+
+	go func() {
+		for !s.Running() {
+			time.Sleep(10 * time.Millisecond)
+		}
+		close(runningChan)
+	}()
+
+	select {
+	case err := <-errChan:
+		t.Fatalf("starting server failed: %v", err)
+	case <-runningChan:
+	}
+
+	c, err := chat.ConnectClient(s.ListenAddress())
+	if err != nil {
+		t.Fatalf("client connection failed: %v", err)
+	}
+	return s, c
+}
 
 // func TestAtoBMessage(t *testing.T) {
 // 	t.Parallel()
