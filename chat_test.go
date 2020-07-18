@@ -146,34 +146,34 @@ func TestSendMessageAndEcho(t *testing.T) {
 
 }
 
-// func TestMultipleAndEcho(t *testing.T) {
-// 	t.Parallel()
+func TestMultipleAndEcho(t *testing.T) {
+	t.Parallel()
 
-// 	s, c := startServerAndClient(t)
-// 	defer s.Stop()
-// 	defer c.Close()
+	s, c := startServerAndClient(t)
+	defer s.Close()
+	defer c.Close()
 
-// 	c.Read()
+	c.Read()
 
-// 	m1 := "Hello all\n"
-// 	want := "Second message\n"
+	m1 := "Hello all\n"
+	want := "Second message\n"
 
-// 	c.Send(m1)
-// 	// fmt.Println("client: message 1 sent")
-// 	c.Read()
-// 	// fmt.Printf("client: message 1 received %s", m) //Check for debug method
-// 	c.Send(want)
-// 	// fmt.Println("client: message 2 sent")
-// 	got, err := c.Read()
+	c.Send(m1)
+	// fmt.Println("client: message 1 sent")
+	c.Read()
+	// fmt.Printf("client: message 1 received %s", m) //Check for debug method
+	c.Send(want)
+	// fmt.Println("client: message 2 sent")
+	got, err := c.Read()
 
-// 	if err != nil {
-// 		t.Fatalf("reading welcome message failed:  %v", err)
-// 	}
-// 	if got != want {
-// 		t.Errorf("sent message: got %q, want %q", got, want)
-// 	}
+	if err != nil {
+		t.Fatalf("reading welcome message failed:  %v", err)
+	}
+	if got != want {
+		t.Errorf("sent message: got %q, want %q", got, want)
+	}
 
-// }
+}
 
 func startServerAndClient(t *testing.T) (*chat.Server, *chat.Client) {
 	s := chat.NewServer()
