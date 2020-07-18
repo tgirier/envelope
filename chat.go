@@ -141,10 +141,27 @@ func (s *Server) Close() {
 
 // ListenAndServe blocks while the server is running
 func (s *Server) ListenAndServe() error {
+	retry := 0
 	ln, err := net.Listen("tcp", s.ListenAddress())
+	for err != nil && retry < 2 {
+		s.Logger.Println(fmt.Sprintf("port not available: %v", err))
+
+		rand.Seed(time.Now().UnixNano())
+		p := 49152 + rand.Intn(16383)
+
+		s.mutex.Lock()
+		s.Port = p
+		s.mutex.Unlock()
+
+		s.Logger.Println(fmt.Sprintf("Switching to port: %d", p))
+		ln, err = net.Listen("tcp", s.ListenAddress())
+		retry++
+	}
+
 	if err != nil {
 		return err
 	}
+
 	s.mutex.Lock()
 	s.listener = ln
 	s.running = true

@@ -79,6 +79,46 @@ func TestServerClose(t *testing.T) {
 	}
 }
 
+func TestPortSwitching(t *testing.T) {
+	t.Parallel()
+
+	s1 := chat.NewServer()
+	s1.Port = 8080
+	s2 := chat.NewServer()
+	s2.Port = 8080
+
+	errChan := make(chan error)
+	runningChan := make(chan struct{})
+
+	go func() {
+		errChan <- s1.ListenAndServe()
+	}()
+	defer s1.Close()
+
+	go func() {
+		errChan <- s2.ListenAndServe()
+	}()
+	defer s2.Close()
+
+	go func() {
+		for !s1.Running() && !s2.Running() {
+			time.Sleep(10 * time.Millisecond)
+		}
+		close(runningChan)
+	}()
+
+	select {
+	case err := <-errChan:
+		t.Fatalf("failed starting server: %v", err)
+	case <-runningChan:
+	}
+
+	if s1.Port == s2.Port {
+		t.Errorf("switching port failed: s1 port %d, s2 port %d", s1.Port, s2.Port)
+	}
+
+}
+
 func TestWelcomeMessage(t *testing.T) {
 	t.Parallel()
 
