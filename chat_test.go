@@ -157,7 +157,7 @@ func TestWelcomeMessage(t *testing.T) {
 	got, err := c.Read()
 
 	if err != nil {
-		t.Fatalf("reading welcome message failed:  %v", err)
+		t.Fatalf("reading back our own message failed:  %v", err)
 	}
 	if got != want {
 		t.Errorf("welcome message: got %q, want %q", got, want)
@@ -179,7 +179,7 @@ func TestSendMessageAndEcho(t *testing.T) {
 	got, err := c.Read() // check for loop
 
 	if err != nil {
-		t.Fatalf("reading welcome message failed:  %v", err)
+		t.Fatalf("reading back our own message failed:  %v", err)
 	}
 	if got != want {
 		t.Errorf("sent message: got %q, want %q", got, want)
@@ -208,7 +208,7 @@ func TestMultipleAndEcho(t *testing.T) {
 	got, err := c.Read()
 
 	if err != nil {
-		t.Fatalf("reading welcome message failed:  %v", err)
+		t.Fatalf("reading back our own message failed:  %v", err)
 	}
 	if got != want {
 		t.Errorf("sent message: got %q, want %q", got, want)
