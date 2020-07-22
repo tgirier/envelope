@@ -37,7 +37,6 @@ func NewServer() *Server {
 	logger := log.New(os.Stderr, "", log.LstdFlags)
 
 	s := &Server{
-		Host:           "localhost",
 		Port:           p,
 		Logger:         logger,
 		WelcomeMessage: "Welcome to Chat Room!",
@@ -103,6 +102,8 @@ func (s *Server) Close() {
 func (s *Server) ListenAndServe() error {
 	retry := 0
 	ln, err := net.Listen("tcp", s.ListenAddress())
+
+	// check for user port and use a port - Freeport library
 	for err != nil && retry < 2 {
 		s.Logger.Println(fmt.Sprintf("port not available: %v", err))
 
