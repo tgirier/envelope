@@ -19,6 +19,7 @@ type Server struct {
 	listener       net.Listener
 	clients        map[*net.Conn]bool
 	register       chan *net.Conn
+	broadcast      chan string
 }
 
 // Logger enables a customization of the log function
@@ -36,31 +37,16 @@ func (s *Server) Run() {
 		case conn := <-s.register:
 			s.clients[conn] = true
 			go s.handle(conn)
+		case m := <-s.broadcast:
+			for conn := range s.clients {
+				_, err := fmt.Fprint(*conn, m)
+				if err != nil {
+					s.Logger.Println(fmt.Sprintf("sending message failed: %v", err))
+				}
+			}
+
 		}
 	}
-
-	// _, err = conn.Write([]byte(s.WelcomeMessage + "\n"))
-	// if err != nil {
-	// 	s.Logger.Println(fmt.Sprintf("sending message failed: %v", err))
-	// }
-
-	// r := bufio.NewReader(conn)
-
-	// m, err := r.ReadString('\n')
-	// if err == io.EOF {
-	// 	s.Logger.Println(fmt.Sprintf("client connection closed: %v", err))
-	// 	conn.Close()
-	// 	break
-	// }
-	// if err != nil {
-	// 	s.Logger.Println(fmt.Sprintf("receiving message failed: %v", err))
-	// }
-	// // fmt.Printf("server: message received %q", m)
-	// _, err = fmt.Fprintf(conn, m)
-	// if err != nil {
-	// 	s.Logger.Println(fmt.Sprintf("sending message failed: %v", err))
-	// }
-	// // fmt.Printf("server: message sent %q", m)
 }
 
 func (s *Server) listen() {
@@ -70,7 +56,6 @@ func (s *Server) listen() {
 			s.Logger.Println(fmt.Sprintf("connection failed: %v", err))
 			return
 		}
-
 		s.register <- &conn
 	}
 }
@@ -83,22 +68,17 @@ func (s *Server) handle(conn *net.Conn) {
 
 	r := bufio.NewReader(*conn)
 
+	err = readMessage(r, s.broadcast)
+	s.Logger.Println(fmt.Sprintf("receiving message failed: %v", err))
+}
+
+func readMessage(r *bufio.Reader, broadcast chan string) error {
 	for {
 		m, err := r.ReadString('\n')
-		if err == io.EOF {
-			s.Logger.Println(fmt.Sprintf("client connection closed: %v", err))
-			(*conn).Close()
-			break
+		if err != nil || err == io.EOF {
+			return err
 		}
-		if err != nil {
-			s.Logger.Println(fmt.Sprintf("receiving message failed: %v", err))
-		}
-		// fmt.Printf("server: message received %q", m)
-		_, err = fmt.Fprintf(*conn, m)
-		if err != nil {
-			s.Logger.Println(fmt.Sprintf("sending message failed: %v", err))
-		}
-		// fmt.Printf("server: message sent %q", m)
+		broadcast <- m
 	}
 }
 
@@ -116,6 +96,7 @@ func ListenAndServe(addr string) (err error) {
 	s.Logger = log.New(os.Stderr, "", log.LstdFlags)
 	s.register = make(chan *net.Conn, 1)
 	s.clients = make(map[*net.Conn]bool)
+	s.broadcast = make(chan string, 10)
 
 	s.listener, err = net.Listen("tcp", addr)
 
