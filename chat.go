@@ -19,6 +19,7 @@ type Server struct {
 	listener       net.Listener
 	clients        map[*net.Conn]bool
 	register       chan *net.Conn
+	unregister     chan *net.Conn
 	broadcast      chan string
 }
 
@@ -36,6 +37,7 @@ func (s *Server) Run() {
 		select {
 		case conn := <-s.register:
 			s.clients[conn] = true
+			s.Logger.Println("client connection registered")
 			go s.handle(conn)
 		case m := <-s.broadcast:
 			for conn := range s.clients {
@@ -44,7 +46,9 @@ func (s *Server) Run() {
 					s.Logger.Println(fmt.Sprintf("sending message failed: %v", err))
 				}
 			}
-
+		case conn := <-s.unregister:
+			delete(s.clients, conn)
+			s.Logger.Println("client connection unregistered")
 		}
 	}
 }
@@ -69,7 +73,14 @@ func (s *Server) handle(conn *net.Conn) {
 	r := bufio.NewReader(*conn)
 
 	err = readMessage(r, s.broadcast)
-	s.Logger.Println(fmt.Sprintf("receiving message failed: %v", err))
+	if err == io.EOF {
+		s.Logger.Println("client connection closed")
+		s.unregister <- conn
+		return
+	}
+	if err != nil {
+		s.Logger.Println(fmt.Sprintf("receiving message failed: %v", err))
+	}
 }
 
 func readMessage(r *bufio.Reader, broadcast chan string) error {
@@ -95,6 +106,7 @@ func ListenAndServe(addr string) (err error) {
 
 	s.Logger = log.New(os.Stderr, "", log.LstdFlags)
 	s.register = make(chan *net.Conn, 1)
+	s.unregister = make(chan *net.Conn, 1)
 	s.clients = make(map[*net.Conn]bool)
 	s.broadcast = make(chan string, 10)
 
