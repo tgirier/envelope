@@ -6,22 +6,19 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math/rand"
 	"net"
 	"os"
-	"sync"
-	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 // Server represents a chat server
 type Server struct {
-	Logger         Logger // with standard logger can be extended with logrus
-	Host           string
-	Port           int
+	Logger         logrus.StdLogger // with standard logger can be extended with logrus
 	WelcomeMessage string
-	mutex          sync.Mutex
 	listener       net.Listener
-	running        bool
+	clients        map[*net.Conn]bool
+	register       chan *net.Conn
 }
 
 // Logger enables a customization of the log function
@@ -29,53 +26,75 @@ type Logger interface {
 	Println(v ...interface{})
 }
 
-// NewServer returns a pointer to a new server on localhost and random port
-func NewServer() *Server {
-	rand.Seed(time.Now().UnixNano())
-	p := 49152 + rand.Intn(16383) // Add used port detection
-
-	logger := log.New(os.Stderr, "", log.LstdFlags)
-
-	s := &Server{
-		Port:           p,
-		Logger:         logger,
-		WelcomeMessage: "Welcome to Chat Room!",
-		running:        false,
-	}
-
-	return s
-}
-
 // Run implements the logic handling connections
 func (s *Server) Run() {
-	conn, err := s.listener.Accept()
-	if err != nil {
-		s.Logger.Println(fmt.Sprintf("connection failed: %v", err))
-		return
+
+	go s.listen()
+
+	for {
+		select {
+		case conn := <-s.register:
+			s.clients[conn] = true
+			go s.handle(conn)
+		}
 	}
-	if !s.Running() {
-		conn.Close() // Not sure if it is still useful as listener.close closes all connections
-		return
+
+	// _, err = conn.Write([]byte(s.WelcomeMessage + "\n"))
+	// if err != nil {
+	// 	s.Logger.Println(fmt.Sprintf("sending message failed: %v", err))
+	// }
+
+	// r := bufio.NewReader(conn)
+
+	// m, err := r.ReadString('\n')
+	// if err == io.EOF {
+	// 	s.Logger.Println(fmt.Sprintf("client connection closed: %v", err))
+	// 	conn.Close()
+	// 	break
+	// }
+	// if err != nil {
+	// 	s.Logger.Println(fmt.Sprintf("receiving message failed: %v", err))
+	// }
+	// // fmt.Printf("server: message received %q", m)
+	// _, err = fmt.Fprintf(conn, m)
+	// if err != nil {
+	// 	s.Logger.Println(fmt.Sprintf("sending message failed: %v", err))
+	// }
+	// // fmt.Printf("server: message sent %q", m)
+}
+
+func (s *Server) listen() {
+	for {
+		conn, err := s.listener.Accept()
+		if err != nil {
+			s.Logger.Println(fmt.Sprintf("connection failed: %v", err))
+			return
+		}
+
+		s.register <- &conn
 	}
-	_, err = conn.Write([]byte(s.WelcomeMessage + "\n"))
+}
+
+func (s *Server) handle(conn *net.Conn) {
+	_, err := (*conn).Write([]byte(s.WelcomeMessage + "\n"))
 	if err != nil {
 		s.Logger.Println(fmt.Sprintf("sending message failed: %v", err))
 	}
 
-	r := bufio.NewReader(conn)
+	r := bufio.NewReader(*conn)
 
-	for s.Running() {
+	for {
 		m, err := r.ReadString('\n')
 		if err == io.EOF {
 			s.Logger.Println(fmt.Sprintf("client connection closed: %v", err))
-			conn.Close()
+			(*conn).Close()
 			break
 		}
 		if err != nil {
 			s.Logger.Println(fmt.Sprintf("receiving message failed: %v", err))
 		}
 		// fmt.Printf("server: message received %q", m)
-		_, err = fmt.Fprintf(conn, m)
+		_, err = fmt.Fprintf(*conn, m)
 		if err != nil {
 			s.Logger.Println(fmt.Sprintf("sending message failed: %v", err))
 		}
@@ -83,57 +102,30 @@ func (s *Server) Run() {
 	}
 }
 
-// Running indicates if the server can accept connections
-func (s *Server) Running() bool {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	return s.running
-}
-
 // Close closes all connection to the server
 func (s *Server) Close() {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	s.running = false
 	s.listener.Close()
 }
 
 // ListenAndServe blocks while the server is running
-func (s *Server) ListenAndServe() error {
-	retry := 0
-	ln, err := net.Listen("tcp", s.ListenAddress())
-
-	// check for user port and use a port - Freeport library
-	for err != nil && retry < 2 {
-		s.Logger.Println(fmt.Sprintf("port not available: %v", err))
-
-		rand.Seed(time.Now().UnixNano())
-		p := 49152 + rand.Intn(16383)
-
-		s.mutex.Lock()
-		s.Port = p
-		s.mutex.Unlock()
-
-		s.Logger.Println(fmt.Sprintf("Switching to port: %d", p))
-		ln, err = net.Listen("tcp", s.ListenAddress())
-		retry++
+func ListenAndServe(addr string) (err error) {
+	s := &Server{
+		WelcomeMessage: "Welcome to Chat Room!",
 	}
+
+	s.Logger = log.New(os.Stderr, "", log.LstdFlags)
+	s.register = make(chan *net.Conn, 1)
+	s.clients = make(map[*net.Conn]bool)
+
+	s.listener, err = net.Listen("tcp", addr)
 
 	if err != nil {
 		return err
 	}
 
-	s.mutex.Lock()
-	s.listener = ln
-	s.running = true
-	s.mutex.Unlock()
+	s.Logger.Println(fmt.Sprintf("Listening on %v", addr))
 
 	s.Run()
 
 	return nil
-}
-
-// ListenAddress returns the address on which the server is listening
-func (s *Server) ListenAddress() string {
-	return fmt.Sprintf(s.Host+":%d", s.Port)
 }

@@ -2,9 +2,11 @@ package chat_test
 
 import (
 	"log"
+	"net"
+	"strconv"
 	"testing"
-	"time"
 
+	"github.com/phayes/freeport"
 	"github.com/tgirier/chat"
 )
 
@@ -17,158 +19,131 @@ func (l *myLogger) Println(v ...interface{}) {
 func TestServerConn(t *testing.T) {
 	t.Parallel()
 
-	s := chat.NewServer()
-	s.Logger = &myLogger{} // look at logrus
-
 	errChan := make(chan error)
-	done := make(chan struct{})
 
-	go func() {
-		errChan <- s.ListenAndServe()
-	}()
-	defer s.Close()
-
-	go func() {
-		c, err := chat.ConnectClient(s.ListenAddress())
-		if err != nil {
-			errChan <- err
-			return
-		}
-		defer c.Close()
-		close(done)
-	}()
-
-	select {
-	case err := <-errChan:
-		t.Fatalf("connection failed: %v", err)
-	case <-done:
-		return
-	}
-}
-
-func TestServerClose(t *testing.T) {
-	t.Parallel()
-
-	s := chat.NewServer()
-
-	errChan := make(chan error)
-	runningChan := make(chan struct{})
-
-	go func() {
-		errChan <- s.ListenAndServe()
-	}()
-
-	go func() {
-		for !s.Running() {
-			time.Sleep(10 * time.Millisecond)
-		}
-		close(runningChan)
-	}()
-
-	select {
-	case err := <-errChan:
-		t.Fatalf("starting server failed: %v", err)
-	case <-runningChan:
-		s.Close()
-	}
-
-	c, err := chat.ConnectClient(s.ListenAddress())
-	if err == nil {
-		t.Error("server still running")
-		defer c.Close()
-	}
-}
-
-func TestPortSwitching(t *testing.T) {
-	t.Parallel()
-
-	s1 := chat.NewServer()
-	s1.Port = 8080
-	s2 := chat.NewServer()
-	s2.Port = 8080
-
-	errChan := make(chan error)
-	runningChan := make(chan struct{})
-
-	go func() {
-		errChan <- s1.ListenAndServe()
-	}()
-	defer s1.Close()
-
-	go func() {
-		errChan <- s2.ListenAndServe()
-	}()
-	defer s2.Close()
-
-	go func() {
-		for !s1.Running() && !s2.Running() {
-			time.Sleep(10 * time.Millisecond)
-		}
-		close(runningChan)
-	}()
-
-	select {
-	case err := <-errChan:
-		t.Fatalf("failed starting server: %v", err)
-	case <-runningChan:
-	}
-
-	if s1.Port == s2.Port {
-		t.Errorf("switching port failed: s1 port %d, s2 port %d", s1.Port, s2.Port)
-	}
-
-}
-
-func TestWelcomeMessage(t *testing.T) {
-	t.Parallel()
-
-	want := "Welcome to Thibaut's chat !\n"
-
-	errChan := make(chan error)
-	runningChan := make(chan struct{})
-
-	s := chat.NewServer()
-	s.WelcomeMessage = want
-
-	go func() {
-		errChan <- s.ListenAndServe()
-	}()
-	defer s.Close()
-
-	go func() {
-		for !s.Running() {
-			time.Sleep(10 * time.Millisecond)
-		}
-		close(runningChan)
-	}()
-
-	select {
-	case err := <-errChan:
-		t.Fatalf("starting server failed: %v", err)
-	case <-runningChan:
-	}
-
-	c, err := chat.ConnectClient(s.ListenAddress())
+	p, err := freeport.GetFreePort()
 	if err != nil {
-		t.Fatalf("client connection failed: %v", err)
+		t.Fatal("no port available")
+	}
+	addr := net.JoinHostPort("localhost", strconv.Itoa(p))
+	go func() {
+		errChan <- chat.ListenAndServe(addr)
+	}()
+
+	// runtime.Gosched()
+
+	c, err := chat.ConnectClient(addr)
+	if err != nil {
+		t.Fatalf("client can't connect: %v", err)
 	}
 	defer c.Close()
-
-	got, err := c.Read()
-
-	if err != nil {
-		t.Fatalf("reading back our own message failed:  %v", err)
-	}
-	if got != want {
-		t.Errorf("welcome message: got %q, want %q", got, want)
-	}
 }
+
+// func TestServerClose(t *testing.T) {
+// 	t.Parallel()
+
+// 	errChan := make(chan error)
+
+// 	p, err := freeport.GetFreePort()
+// 	if err != nil {
+// 		t.Fatal("no port available")
+// 	}
+// 	addr := net.JoinHostPort("localhost", strconv.Itoa(p))
+
+// 	go func() {
+// 		errChan <- chat.ListenAndServe(addr)
+// 	}()
+
+// 	c, err := chat.ConnectClient(addr)
+// 	if err == nil {
+// 		t.Error("server still running")
+// 		defer c.Close()
+// 	}
+// }
+
+// func TestPortSwitching(t *testing.T) {
+// 	t.Parallel()
+
+// 	s1 := chat.NewServer()
+// 	s1.Port = 8080
+// 	s2 := chat.NewServer()
+// 	s2.Port = 8080
+
+// 	errChan := make(chan error)
+// 	runningChan := make(chan struct{})
+
+// 	go func() {
+// 		errChan <- s1.ListenAndServe()
+// 	}()
+// 	defer s1.Close()
+
+// 	go func() {
+// 		errChan <- s2.ListenAndServe()
+// 	}()
+// 	defer s2.Close()
+
+// 	go func() {
+// 		for !s1.Running() && !s2.Running() {
+// 			time.Sleep(10 * time.Millisecond)
+// 		}
+// 		close(runningChan)
+// 	}()
+
+// 	select {
+// 	case err := <-errChan:
+// 		t.Fatalf("failed starting server: %v", err)
+// 	case <-runningChan:
+// 	}
+
+// 	if s1.Port == s2.Port {
+// 		t.Errorf("switching port failed: s1 port %d, s2 port %d", s1.Port, s2.Port)
+// 	}
+
+// }
+
+// func TestWelcomeMessage(t *testing.T) {
+// 	t.Parallel()
+
+// 	want := "Welcome to Thibaut's chat !\n"
+
+// 	errChan := make(chan error)
+
+// 	s := chat.NewServer()
+// 	s.WelcomeMessage = want
+
+// 	p, err := freeport.GetFreePort()
+// 	if err != nil {
+// 		t.Fatal("no port available")
+// 	}
+// 	addr := net.JoinHostPort("localhost", strconv.Itoa(p))
+
+// 	go func() {
+// 		errChan <- chat.ListenAndServe(addr)
+// 	}()
+// 	defer s.Close()
+
+// 	<-s.Ready
+
+// 	c, err := chat.ConnectClient(addr)
+// 	if err != nil {
+// 		t.Fatalf("client connection failed: %v", err)
+// 	}
+// 	defer c.Close()
+
+// 	got, err := c.Read()
+
+// 	if err != nil {
+// 		t.Fatalf("reading back our own message failed:  %v", err)
+// 	}
+// 	if got != want {
+// 		t.Errorf("welcome message: got %q, want %q", got, want)
+// 	}
+// }
 
 func TestSendMessageAndEcho(t *testing.T) {
 	t.Parallel()
 
-	s, c := startServerAndClient(t)
-	defer s.Close()
+	c := startServerAndClient(t)
 	defer c.Close()
 
 	c.Read()
@@ -190,8 +165,7 @@ func TestSendMessageAndEcho(t *testing.T) {
 func TestMultipleAndEcho(t *testing.T) {
 	t.Parallel()
 
-	s, c := startServerAndClient(t)
-	defer s.Close()
+	c := startServerAndClient(t)
 	defer c.Close()
 
 	c.Read()
@@ -216,34 +190,24 @@ func TestMultipleAndEcho(t *testing.T) {
 
 }
 
-func startServerAndClient(t *testing.T) (*chat.Server, *chat.Client) {
-	s := chat.NewServer()
-
+func startServerAndClient(t *testing.T) *chat.Client {
 	errChan := make(chan error)
-	runningChan := make(chan struct{})
 
-	go func() {
-		errChan <- s.ListenAndServe()
-	}()
-
-	go func() {
-		for !s.Running() {
-			time.Sleep(10 * time.Millisecond)
-		}
-		close(runningChan)
-	}()
-
-	select {
-	case err := <-errChan:
-		t.Fatalf("starting server failed: %v", err)
-	case <-runningChan:
+	p, err := freeport.GetFreePort()
+	if err != nil {
+		t.Fatal("no port available")
 	}
+	addr := net.JoinHostPort("localhost", strconv.Itoa(p))
 
-	c, err := chat.ConnectClient(s.ListenAddress())
+	go func() {
+		errChan <- chat.ListenAndServe(addr)
+	}()
+
+	c, err := chat.ConnectClient(addr)
 	if err != nil {
 		t.Fatalf("client connection failed: %v", err)
 	}
-	return s, c
+	return c
 }
 
 // func TestAtoBMessage(t *testing.T) {
