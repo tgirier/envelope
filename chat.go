@@ -67,24 +67,17 @@ func (s *Server) handle(conn *net.Conn) {
 
 	r := bufio.NewReader(*conn)
 
-	err = readMessage(r, s.broadcast)
-	if err == io.EOF {
-		s.Logger.Println("client connection closed")
-		s.unregister <- conn
-		return
-	}
-	if err != nil {
-		s.Logger.Println(fmt.Sprintf("receiving message failed: %v", err))
-	}
-}
-
-func readMessage(r *bufio.Reader, broadcast chan string) error {
 	for {
-		m, err := r.ReadString('\n')
-		if err != nil || err == io.EOF {
-			return err
+		msg, err := r.ReadString('\n')
+		if err == io.EOF {
+			s.Logger.Println("client connection closed")
+			s.unregister <- conn
+			break
 		}
-		broadcast <- m
+		if err != nil {
+			s.Logger.Println(fmt.Sprintf("receiving message failed: %v", err))
+		}
+		s.broadcast <- msg
 	}
 }
 
