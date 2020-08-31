@@ -1,7 +1,6 @@
 package chat_test
 
 import (
-	"log"
 	"net"
 	"strconv"
 	"testing"
@@ -10,12 +9,6 @@ import (
 	"github.com/tgirier/chat"
 )
 
-type myLogger struct {
-}
-
-func (l *myLogger) Println(v ...interface{}) {
-	log.Printf("log: %s", v)
-}
 func TestServerConn(t *testing.T) {
 	t.Parallel()
 
