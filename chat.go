@@ -23,11 +23,6 @@ type Server struct {
 	broadcast      chan string
 }
 
-// Logger enables a customization of the log function
-type Logger interface {
-	Println(v ...interface{})
-}
-
 // Run implements the logic handling connections
 func (s *Server) Run() {
 
