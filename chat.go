@@ -60,7 +60,7 @@ func (s *Server) listen() {
 }
 
 func (s *Server) handle(conn *net.Conn) {
-	_, err := (*conn).Write([]byte(s.WelcomeMessage + "\n"))
+	_, err := fmt.Fprintf(*conn, s.WelcomeMessage+"\n")
 	if err != nil {
 		s.Logger.Println(fmt.Sprintf("sending message failed: %v", err))
 	}
