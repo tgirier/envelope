@@ -34,9 +34,9 @@ func (s *Server) Run() {
 			s.clients[conn] = true
 			s.Logger.Println("client connection registered")
 			go s.handle(conn)
-		case m := <-s.broadcast:
+		case msg := <-s.broadcast:
 			for conn := range s.clients {
-				_, err := fmt.Fprint(*conn, m)
+				_, err := fmt.Fprint(*conn, msg)
 				if err != nil {
 					s.Logger.Println(fmt.Sprintf("sending message failed: %v", err))
 				}
