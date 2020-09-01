@@ -8,6 +8,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 )
@@ -76,6 +77,8 @@ func (s *Server) listen() {
 			continue
 		}
 
+		username = strings.TrimSuffix(username, "\n")
+
 		c := &Connection{
 			conn:     &conn,
 			username: username,
@@ -98,6 +101,9 @@ func (s *Server) handle(c *Connection) {
 		if err != nil {
 			s.Logger.Println(fmt.Sprintf("receiving message failed: %v", err))
 		}
+
+		msg = c.username + ": " + msg
+
 		s.broadcast <- msg
 	}
 }
