@@ -86,11 +86,6 @@ func (s *Server) listen() {
 }
 
 func (s *Server) handle(c *Connection) {
-	// _, err := fmt.Fprintf(*conn, s.WelcomeMessage+"\n")
-	// if err != nil {
-	// 	s.Logger.Println(fmt.Sprintf("sending message failed: %v", err))
-	// }
-
 	r := bufio.NewReader(*c.conn)
 
 	for {
