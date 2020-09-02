@@ -40,6 +40,8 @@ func (s *Server) Run() {
 		case c := <-s.register:
 			s.clients[c.conn] = c.username
 			s.Logger.Println("client connection registered")
+			msg := fmt.Sprintf("%s joined the chat\n", c.username)
+			s.broadcast <- msg
 			go s.handle(c)
 		case msg := <-s.broadcast:
 			for conn := range s.clients {
