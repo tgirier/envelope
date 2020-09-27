@@ -40,10 +40,15 @@ func TestSendMessageAndEcho(t *testing.T) {
 
 	c.Read()
 
-	want := "Hello all\n"
+	username := "My Name"
+	msg := "Hello all"
+	want := username + ": " + msg + "\n"
 
-	c.Send(want)
-	got, err := c.Read() // check for loop
+	c.Send(username + "\n")
+	_, err := c.Read()
+
+	c.Send(msg + "\n")
+	got, err := c.Read()
 
 	if err != nil {
 		t.Fatalf("reading back our own message failed:  %v", err)
