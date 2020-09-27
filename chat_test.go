@@ -32,6 +32,28 @@ func TestServerConn(t *testing.T) {
 	defer c.Close()
 }
 
+func TestUsername(t *testing.T) {
+	t.Parallel()
+
+	c := startServerAndClient(t)
+	defer c.Close()
+
+	c.Read()
+
+	username := "My Name"
+	want := "My Name joined the chat\n"
+
+	c.Send(username + "\n")
+	got, err := c.Read()
+
+	if err != nil {
+		t.Fatalf("reading back the joined chat message failed: %v", err)
+	}
+	if got != want {
+		t.Errorf("username sent: got %q, want %q", got, want)
+	}
+}
+
 func TestSendMessageAndEcho(t *testing.T) {
 	t.Parallel()
 
