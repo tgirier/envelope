@@ -31,7 +31,7 @@ type Connection struct {
 }
 
 // Run implements the logic handling connections
-func (s *Server) Run() {
+func (s *Server) run() {
 
 	go s.listen()
 
@@ -135,7 +135,7 @@ func ListenAndServe(addr string) (err error) {
 
 	s.Logger.Println(fmt.Sprintf("Listening on %v", addr))
 
-	s.Run()
+	s.run()
 
 	return nil
 }
