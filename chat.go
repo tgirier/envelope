@@ -15,7 +15,7 @@ import (
 
 // Server represents a chat server
 type Server struct {
-	Logger         logrus.StdLogger // with standard logger can be extended with logrus
+	Logger         logrus.StdLogger
 	WelcomeMessage string
 	listener       net.Listener
 	clients        map[*net.Conn]string

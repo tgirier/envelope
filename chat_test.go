@@ -1,9 +1,11 @@
 package chat_test
 
 import (
+	"log"
 	"net"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/phayes/freeport"
 	"github.com/tgirier/chat"
@@ -13,6 +15,7 @@ func TestServerConn(t *testing.T) {
 	t.Parallel()
 
 	errChan := make(chan error)
+	logger := newTestLogger(t)
 
 	p, err := freeport.GetFreePort()
 	if err != nil {
@@ -20,23 +23,19 @@ func TestServerConn(t *testing.T) {
 	}
 	addr := net.JoinHostPort("localhost", strconv.Itoa(p))
 	go func() {
-		errChan <- chat.ListenAndServe(addr)
+		errChan <- chat.ListenAndServeWithLogger(addr, logger)
 	}()
 
-	// runtime.Gosched()
-
-	c, err := chat.ConnectClient(addr)
+	_, err = chat.ConnectClient(addr)
 	if err != nil {
 		t.Fatalf("client can't connect: %v", err)
 	}
-	defer c.Close()
 }
 
 func TestUsername(t *testing.T) {
 	t.Parallel()
 
 	c := startServerAndClient(t)
-	defer c.Close()
 
 	c.Read()
 
@@ -58,7 +57,6 @@ func TestSendMessageAndEcho(t *testing.T) {
 	t.Parallel()
 
 	c := startServerAndClient(t)
-	defer c.Close()
 
 	c.Read()
 
@@ -72,6 +70,11 @@ func TestSendMessageAndEcho(t *testing.T) {
 	c.Send(msg + "\n")
 	got, err := c.Read()
 
+	c.Close()
+
+	// Enable server to log client closing
+	time.Sleep(10 * time.Millisecond)
+
 	if err != nil {
 		t.Fatalf("reading back our own message failed:  %v", err)
 	}
@@ -84,6 +87,8 @@ func TestSendMessageAndEcho(t *testing.T) {
 func startServerAndClient(t *testing.T) *chat.Client {
 	errChan := make(chan error)
 
+	logger := newTestLogger(t)
+
 	p, err := freeport.GetFreePort()
 	if err != nil {
 		t.Fatal("no port available")
@@ -91,7 +96,7 @@ func startServerAndClient(t *testing.T) *chat.Client {
 	addr := net.JoinHostPort("localhost", strconv.Itoa(p))
 
 	go func() {
-		errChan <- chat.ListenAndServe(addr)
+		errChan <- chat.ListenAndServeWithLogger(addr, logger)
 	}()
 
 	c, err := chat.ConnectClient(addr)
@@ -99,4 +104,19 @@ func startServerAndClient(t *testing.T) *chat.Client {
 		t.Fatalf("client connection failed: %v", err)
 	}
 	return c
+}
+
+func newTestLogger(t *testing.T) *log.Logger {
+	t.Helper()
+	return log.New(testWriter{t}, t.Name()+" ", 0)
+}
+
+type testWriter struct {
+	*testing.T
+}
+
+func (tw testWriter) Write(p []byte) (int, error) {
+	tw.Helper()
+	tw.Logf("%s", p)
+	return len(p), nil
 }
