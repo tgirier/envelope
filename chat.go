@@ -117,11 +117,17 @@ func (s *Server) Close() {
 
 // ListenAndServe blocks while the server is running
 func ListenAndServe(addr string) (err error) {
+	return ListenAndServeWithLogger(addr, log.New(os.Stderr, "", log.LstdFlags))
+}
+
+// ListenAndServeWithLogger blocks while the server is running.
+// Enable logger customization
+func ListenAndServeWithLogger(addr string, logger logrus.StdLogger) (err error) {
 	s := &Server{
 		WelcomeMessage: "Welcome to Chat Room! Please enter your username:",
 	}
 
-	s.Logger = log.New(os.Stderr, "", log.LstdFlags)
+	s.Logger = logger
 	s.register = make(chan *Connection, 1)
 	s.unregister = make(chan *net.Conn, 1)
 	s.clients = make(map[*net.Conn]string)
