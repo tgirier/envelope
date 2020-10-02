@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 
-	"github.com/tgirier/chat"
+	"github.com/tgirier/envelope"
 )
 
 func main() {
-	log.Fatal(chat.ListenAndServe("localhost:8080"))
+	log.Fatal(envelope.ListenAndServe("localhost:8080"))
 }
