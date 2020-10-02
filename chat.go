@@ -40,7 +40,7 @@ func (s *server) run() {
 		case c := <-s.register:
 			s.clients[c.conn] = c.username
 			s.logger.Println("client connection registered")
-			msg := fmt.Sprintf("%s joined the chat\n", c.username)
+			msg := fmt.Sprintf("%s joined envelope\n", c.username)
 			s.broadcast <- msg
 			go s.handle(c)
 		case msg := <-s.broadcast:
@@ -119,7 +119,7 @@ func ListenAndServe(addr string) (err error) {
 // Enable logger customization
 func ListenAndServeWithLogger(addr string, logger logrus.StdLogger) (err error) {
 	s := &server{
-		welcomeMessage: "Welcome to Chat Room! Please enter your username:",
+		welcomeMessage: "Welcome to envelope! Please enter your username:",
 	}
 
 	s.logger = logger
