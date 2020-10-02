@@ -1,11 +1,12 @@
 ![envelope](https://i.imgur.com/ZzxTAKL.gif)
+
 Envelope is a basic chat server using TCP websockets.
 
 Envelope broadcasts messages to all connected users.
 
 Built with :heart: in Paris
 
-A huge thanks to @bitfield for his mentoring on this project.
+:raised_hands: A huge thanks to @bitfield for his mentoring on this project. :raised_hands:
 
 # Installation
 
