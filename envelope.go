@@ -1,5 +1,5 @@
-// Package chat implements a chat server & client
-package chat
+// Package envelope implements an envelope server & client
+package envelope
 
 import (
 	"bufio"

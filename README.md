@@ -65,11 +65,11 @@ Then, simply enter your message and press **Enter** to send it to all connected 
 
 To create a new client connected to a given envelope server use ConnectClient. It takes the address of the target envelope server as a string:
 ```Go
-client, err := ConnectClient(<SERVER_ADDRESS>)
+client, err := envelope.ConnectClient(<SERVER_ADDRESS>)
 ```
 *Example - For a local server running on 8080:*
 ```Go
-client, err := ConnectClient("localhost:8080")
+client, err := envelope.ConnectClient("localhost:8080")
 ```
 
 Next, the server will send the welcome message and ask for the username. To handle it, simply use the Read method on the newly created client:

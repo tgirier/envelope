@@ -1,4 +1,4 @@
-package chat_test
+package envelope_test
 
 import (
 	"log"
@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/phayes/freeport"
-	"github.com/tgirier/chat"
+	"github.com/tgirier/envelope"
 )
 
 func TestServerConn(t *testing.T) {
@@ -23,10 +23,10 @@ func TestServerConn(t *testing.T) {
 	}
 	addr := net.JoinHostPort("localhost", strconv.Itoa(p))
 	go func() {
-		errChan <- chat.ListenAndServeWithLogger(addr, logger)
+		errChan <- envelope.ListenAndServeWithLogger(addr, logger)
 	}()
 
-	_, err = chat.ConnectClient(addr)
+	_, err = envelope.ConnectClient(addr)
 	if err != nil {
 		t.Fatalf("client can't connect: %v", err)
 	}
@@ -40,7 +40,7 @@ func TestUsername(t *testing.T) {
 	c.Read()
 
 	username := "My Name"
-	want := "My Name joined the chat\n"
+	want := "My Name joined envelope\n"
 
 	c.Send(username + "\n")
 	got, err := c.Read()
@@ -84,7 +84,7 @@ func TestSendMessageAndEcho(t *testing.T) {
 
 }
 
-func startServerAndClient(t *testing.T) *chat.Client {
+func startServerAndClient(t *testing.T) *envelope.Client {
 	errChan := make(chan error)
 
 	logger := newTestLogger(t)
@@ -96,10 +96,10 @@ func startServerAndClient(t *testing.T) *chat.Client {
 	addr := net.JoinHostPort("localhost", strconv.Itoa(p))
 
 	go func() {
-		errChan <- chat.ListenAndServeWithLogger(addr, logger)
+		errChan <- envelope.ListenAndServeWithLogger(addr, logger)
 	}()
 
-	c, err := chat.ConnectClient(addr)
+	c, err := envelope.ConnectClient(addr)
 	if err != nil {
 		t.Fatalf("client connection failed: %v", err)
 	}
